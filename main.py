@@ -28,6 +28,20 @@ def get_pets():
     return pets
 
 
+@app.get("/pets/average")
+def age_average():
+    if len(pets) == 0:
+        raise HTTPException(status_code=400, detail="No hay mascotas.")
+    total_age = 0
+    count = 0
+
+    for pet in pets:
+        total_age = total_age + pet.age
+        count = count + 1
+    average = total_age / count
+    return {"Promedio de edad": round(average, 2)}
+
+
 @app.get("/pets/{pet_id}", response_model=Pet)
 def get_pet(pet_id: int):
     for pet in pets:

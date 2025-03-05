@@ -1,71 +1,10 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional
+from fastapi import FastAPI
+from controller.pet_controller import router as pet_router
 
 app = FastAPI()
 
-class Pet(BaseModel):
-    id: int
-    name: str
-    age: int
-    type: str
-    owner: Optional[str]
+app.include_router(pet_router)
 
-pets = []
-
-
-@app.post("/pets/", response_model=Pet)
-def create_pet(pet: Pet):
-    for p in pets:
-        if p.id == pet.id:
-            raise HTTPException(status_code=400, detail="Este ID ya fue creado.")
-    pets.append(pet)
-    return pet
-
-
-@app.get("/pets/", response_model=List[Pet])
-def get_pets():
-    return pets
-
-
-@app.get("/pets/average")
-def age_average():
-    if len(pets) == 0:
-        raise HTTPException(status_code=400, detail="No hay mascotas.")
-    total_age = 0
-    count = 0
-
-    for pet in pets:
-        total_age = total_age + pet.age
-        count = count + 1
-    average = total_age / count
-    return {"Promedio de edad": round(average, 2)}
-
-
-@app.get("/pets/{pet_id}", response_model=Pet)
-def get_pet(pet_id: int):
-    for pet in pets:
-        if pet.id == pet_id:
-            return pet
-    raise HTTPException(status_code=404, detail="Mascota no encontrada.")
-
-
-@app.put("/pets/{pet_id}", response_model=Pet)
-def update_pet(pet_id: int, updated_pet: Pet):
-    for pet in pets:
-        if pet.id == pet_id:
-            pet.name = updated_pet.name
-            pet.age = updated_pet.age
-            pet.type = updated_pet.type
-            pet.owner = updated_pet.owner
-            return pet
-    raise HTTPException(status_code=404, detail="Mascota no encontrada.")
-
-
-@app.delete("/pets/{pet_id}")
-def delete_pet(pet_id: int):
-    for pet in pets:
-        if pet.id == pet_id:
-            pets.remove(pet)
-            return {"Aviso": "Mascota eliminada correctamente"}
-    raise HTTPException(status_code=404, detail="Mascota no encontrada.")
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

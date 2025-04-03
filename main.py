@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from controller.pet_controller import router as pet_router
 
 app = FastAPI()
-
 app.include_router(pet_router)
 
 if __name__ == "__main__":
